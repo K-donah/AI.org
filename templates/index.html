@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Healthcare Chatbot (Sesotho + English)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { background: #f7f8fa; font-family: 'Segoe UI'; }
+    .chat-box { width: 100%; max-width: 700px; margin: 40px auto; background: white; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .chat-header { background: #007bff; color: white; padding: 15px; border-radius: 15px 15px 0 0; text-align: center; }
+    .chat-body { height: 400px; overflow-y: auto; padding: 20px; }
+    .msg { margin-bottom: 15px; }
+    .user-msg { text-align: right; }
+    .bot-msg { text-align: left; color: #333; }
+    .chat-footer { padding: 15px; border-top: 1px solid #eee; }
+    .quick-buttons button { margin: 2px; }
+  </style>
+</head>
+<body>
+  <div class="chat-box">
+    <div class="chat-header">🩺 Healthcare Chatbot (Sesotho + English)</div>
+    <div class="chat-body" id="chatBody">
+      {% if chat_history %}
+        {% for line in chat_history.split('\n') %}
+          {% if line.startswith('[') and 'You:' in line %}
+            <div class='msg user-msg'><b>You:</b> {{ line.split('You:')[1].strip() }}</div>
+          {% elif line.startswith('[') and 'Bot:' in line %}
+            <div class='msg bot-msg'><b>Bot:</b> {{ line.split('Bot:')[1].strip() }}</div>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <div class="msg bot-msg">Hello! How can I assist you today? / Lumela! U ka nthusa'ng hona joang?</div>
+      {% endif %}
+    </div>
+    <div class="chat-footer">
+      <div class="quick-buttons mb-2">
+        <button class="btn btn-sm btn-outline-primary" onclick="sendQuick('Maternal Health')">Maternal Health</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="sendQuick('Nutrition')">Nutrition</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="sendQuick('HIV Info')">HIV Info</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="sendQuick('General Health')">General Health</button>
+      </div>
+      <div class="input-group">
+        <input id="msg" type="text" class="form-control" placeholder="Type or record your question..." />
+        <button class="btn btn-success" onclick="send()">Send</button>
+        <button class="btn btn-danger" onclick="startRecording()">🎙️</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function send() {
+      const msg = document.getElementById("msg").value.trim();
+      if (!msg) return;
+      document.getElementById("chatBody").innerHTML += `<div class='msg user-msg'><b>You:</b> ${msg}</div>`;
+      document.getElementById("msg").value = "";
+
+      const res = await fetch("/get", {
+        method: "POST",
+        body: new URLSearchParams({ msg })
+      });
+      const data = await res.json();
+
+      document.getElementById("chatBody").innerHTML += `<div class='msg bot-msg'><b>Bot:</b> ${data.response}</div>`;
+      document.getElementById("chatBody").scrollTop = document.getElementById("chatBody").scrollHeight;
+
+      // Auto-speak
+      const speakRes = await fetch("/speak", {
+        method: "POST",
+        body: new URLSearchParams({ text: data.response })
+      });
+      const audio = await speakRes.json();
+      const audioPlayer = new Audio(audio.audio_url);
+      audioPlayer.play();
+    }
+
+    function sendQuick(topic) {
+      document.getElementById("msg").value = topic;
+      send();
+    }
+
+    async function startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks = [];
+      mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'input.wav');
+        const res = await fetch("/voice", { method: "POST", body: formData });
+        const data = await res.json();
+        document.getElementById("msg").value = data.text;
+        send();
+      };
+      mediaRecorder.start();
+      setTimeout(() => mediaRecorder.stop(), 4_000);
+      alert("🎙️ Recording for 4 seconds...");
+    }
+  </script>
+</body>
+</html>

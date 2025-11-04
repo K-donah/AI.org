@@ -1,0 +1,115 @@
+/* Body & Background */
+body {
+  background: linear-gradient(135deg, #a8edea, #fed6e3);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+/* Chat Container */
+.chat-container {
+  width: 420px;
+  max-width: 95%;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Chat Box (Messages Area) */
+.chat-box {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar Styling */
+.chat-box::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 10px;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.chat-box::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+/* Input Container */
+.input-container {
+  display: flex;
+  border-top: 1px solid #ddd;
+  background: #fafafa;
+}
+
+/* Input Field */
+input[type="text"] {
+  flex: 1;
+  padding: 12px 15px;
+  border: none;
+  font-size: 16px;
+  border-radius: 0 0 0 20px;
+  outline: none;
+  transition: background 0.3s;
+}
+
+input[type="text"]:focus {
+  background: #f0f8ff;
+}
+
+/* Send Button */
+button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  border-radius: 0 0 20px 0;
+  transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Messages */
+.user-message {
+  background: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 20px 20px 0 20px;
+  align-self: flex-end;
+  max-width: 75%;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  word-wrap: break-word;
+  transition: background 0.3s;
+}
+
+.bot-message {
+  background: #f1f1f1;
+  color: #333;
+  padding: 10px 15px;
+  border-radius: 20px 20px 20px 0;
+  align-self: flex-start;
+  max-width: 75%;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+  word-wrap: break-word;
+}
